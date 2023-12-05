@@ -1,53 +1,41 @@
-#include <stdio.h>
-#include <stdarg.h>
-#include <main.h>
-
+#include "main.h"
 /**
- * _printf - function that produce output according to format
- * return: int
- *
+ * _printf - is a function that selects the correct function to print.
+ * @format: identifier to look for.
+ * Return: the length of the string.
  */
-int _printf (const char *format, ...)
+int _printf(const char * const format, ...)
 {
-	va_list num;
-	var_start (num, format);
-	int count = 0;
+	convert_match m[] = {
+		{"%s", printf_string}, {"%c", printf_char},
+		{"%%", printf_37}
+	};
 
-	while (*format != '\0')
+	va_list args;
+	int i = 0, j, len = 0;
+
+	va_start(args, format);
+	if (format == NULL || (format[0] == '%' && format[1] == '\0'))
+		return (-1);
+
+Here:
+	while (format[i] != '\0')
 	{
-		if (*format == '%')
+		j = 2;
+		while (j >= 0)
 		{
-			format++;
-			switch (*format)
+			if (m[j].id[0] == format[i] && m[j].id[1] == format[i + 1])
 			{
-				case 'c':
-					char c =(char)va_arg(num, int);
-					write(1, &c, 1);
-					count++;
-					break;
-				case 's':
-					const char *str = va_arg(num, const char*);
-					int len = 0;
-					while (str[len] != '\0')
-						len++;
-					write(1, str, len);
-					count += len;
-
-					break;
-				case '%':
-					write(1, "%", 1);
-					count++;
-					break;
-				default:
-					break:
+				len += m[j].f(args);
+				i = i + 2;
+				goto Here;
 			}
+			j--;
 		}
-		else
-			write(1, format, 1);
-			count++;
-		format++;
-
+		_putchar(format[i]);
+		len++;
+		i++;
 	}
-	va_end (args);
-	return count;
+	va_end(args);
+	return (len);
 }
